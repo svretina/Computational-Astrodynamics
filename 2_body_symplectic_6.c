@@ -17,7 +17,7 @@ double p20; //vy0
 const double t0 = 0.0;
 double dt;
 //Total number of rotations
-int N_rotations;
+int N_rotations = 1000000;
 float e;
 
 double dTdp1(double p1)
@@ -40,7 +40,7 @@ double dVdq2(double q1, double q2)
     return (mu*q2)/((q1*q1 + q2*q2)*sqrt(q1*q1 + q2*q2));
 }
 
-const double E0()
+double E0()
 {
     return 0.5*(p10*p10 + p20*p20) - mu/sqrt(q10*q10 + q20*q20);
 }
@@ -54,7 +54,7 @@ int main(int argc, char **argv)
   // dt
   // Number of rotations
   
-  if (argc!=6){
+  if (argc!=5){
     printf("Wrong number of arguments.");
       return 0;
     }
@@ -63,7 +63,7 @@ int main(int argc, char **argv)
     q10 = atof(argv[2]);
     p20 = atof(argv[3]);
     dt = atof(argv[4]);
-    N_rotations = atoi(argv[5]);
+    //N_rotations = atoi(argv[5]);
   }
   //printf("e=%.2f x0 = %f v_y0 = %f  dt= %f num_rot = %d\n", e,q10,p20,dt,N_rotations);
     //symplectic coefficients
@@ -120,9 +120,9 @@ int main(int argc, char **argv)
     char outputfile[strlen(method)+strlen(extension)+strlen(eccentricity)+strlen(step)+strlen(rotations)+4];
     snprintf( outputfile , sizeof(outputfile ), "%s_%s_%s_%s%s", method,eccentricity,step,rotations,extension );
 
-    
+    int counter;
     FILE *fp = fopen( outputfile,"w");
-    fprintf(fp,"\n\n t\t\tx\t\t\ty\t\t\tdE\n\n");
+    //fprintf(fp,"\n\n t\t\tx\t\t\ty\t\t\tdE\n\n");
     fprintf(fp,"%f,%.16f,%.16f,%.16f\n",t0,q10,p10,0.0);
     //printf("Calculating orbit. Please wait...\n");
     clock_t begin, end;
@@ -168,7 +168,8 @@ int main(int argc, char **argv)
         q2 = q2_temp7 + c8*dt*dTdp2(p2);
 
         double Energy = 0.5*(p1*p1 + p2*p2) - mu/sqrt(q1*q1 + q2*q2);
-	if ((t/(2.*pi))>(N_rotations-10)){
+	counter = (int) (t/(2.*pi));
+	  if ((0<counter && counter<1) || (1000<counter && counter<1001) || (10000<counter && counter<10001) ||  (100000<counter && counter<100001) || (999999<counter && counter<1000000)) {
 	    fprintf(fp,"%f,%.16f,%.16f,%.16f\n",t+dt,q1,q2,fabs(E0()-Energy));
 	  }
         q1t = q1;
@@ -180,7 +181,7 @@ int main(int argc, char **argv)
     double delta_t = (double)(end-begin)/CLOCKS_PER_SEC;
     
     FILE *fp2 = fopen( "time.txt","a");
-    fprintf(fp2," %s,%s,%f,%s,%f\n",method,eccentricity,dt,rotations,delta_t);
+    fprintf(fp2,"%s,%s,%f,%s,%f\n",method,eccentricity,dt,rotations,delta_t);
 
     fclose(fp2);
     fclose(fp);

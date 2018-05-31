@@ -19,7 +19,7 @@ int N; //number of Taylor terms
 const double t0 = 0.0;
 double dt;
 //Total number of rotations
-int N_rotations;
+int N_rotations = 1000000;
 float e;
 //energy integral
 double E0()
@@ -30,7 +30,7 @@ double E0()
 int main(int argc, char **argv)
 {
 
-  if (argc!=7){
+  if (argc!=6){
     printf("Wrong number of arguments.");
     return 0;
   }
@@ -39,8 +39,8 @@ int main(int argc, char **argv)
     x0 = atof(argv[2]);
     k0 = atof(argv[3]);
     dt = atof(argv[4]);
-    N_rotations = atoi(argv[5]);
-    N = atoi(argv[6]);
+    //N_rotations = atoi(argv[5]);
+    N = atoi(argv[5]);
   }
     double a[N+1], b[N+1], c[N+1], d[N+1];
     double A[N+1], B[N+1], C[N+1], D[N+1], E[N+1], F[N+1];
@@ -66,10 +66,9 @@ int main(int argc, char **argv)
     snprintf( outputfile , sizeof(outputfile ), "%s_%s_%s_%s_%s%s", method,eccentricity,step,rotations,terms,extension );
 
 
-    
+    int counter;
     FILE *fp1 = fopen(outputfile,"w");
-    fprintf(fp1,"t\t\tx\t\t\ty\t\t\tdE\n\n");
-    fprintf(fp1,"%f\t%.16f\t%.16f\t%.16f\n",t0,x0,y_0,fabs(Energy-E0()));
+    fprintf(fp1,"%f,%.16f,%.16f,%.16f\n",t0,x0,y_0,fabs(Energy-E0()));
     //printf("Calculating orbit. Please wait...\n");
     clock_t begin, end;
     begin = clock();
@@ -137,7 +136,12 @@ int main(int argc, char **argv)
         }
         //keep track of the total energy
         Energy = 0.5*(sumz*sumz + sumk*sumk) - mu/sqrt(sumx*sumx + sumy*sumy);
-        fprintf(fp1,"%f,%.16f,%.16f,%.16f\n",t+dt,sumx,sumy,fabs(E0()-Energy));
+	counter = (int)(t/(2.*pi);
+			
+	if ((0<counter && counter<1) || (1000<counter && counter<1001) || (10000<counter && counter<10001) ||  (100000<counter && counter<100001) || (999999<counter && counter<1000000)) {
+	  fprintf(fp1,"%f,%.16f,%.16f,%.16f\n",t+dt,sumx,sumy,fabs(E0()-Energy));
+			  
+	}	
         //update initial conditions for the next t
         a[0]=sumx;
         b[0]=sumy;
@@ -147,8 +151,12 @@ int main(int argc, char **argv)
     end = clock();
     double delta_t = (double)(end-begin)/CLOCKS_PER_SEC;
     FILE *fp2 = fopen( "time.txt","a");
-    fprintf(fp2,"%s,%s,%f,%s,%d,%f\n",method,eccentricity,dt,rotations,N,delta_t);
 
+   
+    fprintf(fp2," %s,%s,%f,%s,%d,%f\n",method,eccentricity,dt,rotations,N,delta_t);
+	  
+    
+   
     
     //printf(">> tmax = %f\n",tmax);
     //printf("Estimated calculation time : delta_t = %f\n",delta_t);
